@@ -1,0 +1,85 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://shaders/screen_pixel_outline.shader" type="Shader" id=1]
+[ext_resource path="res://Outline3D.gd" type="Script" id=2]
+[ext_resource path="res://FpsCamera.gd" type="Script" id=3]
+[ext_resource path="res://ScreenQuad.gd" type="Script" id=4]
+[ext_resource path="res://OutlineViewport.gd" type="Script" id=5]
+
+[sub_resource type="SphereMesh" id=1]
+
+[sub_resource type="CubeMesh" id=5]
+
+[sub_resource type="QuadMesh" id=2]
+size = Vector2( 2, 2 )
+
+[sub_resource type="ViewportTexture" id=6]
+viewport_path = NodePath("Viewport")
+
+[sub_resource type="ShaderMaterial" id=4]
+resource_local_to_scene = true
+shader = ExtResource( 1 )
+shader_param/OutlineColor = Color( 1, 1, 1, 1 )
+shader_param/ScreenTexture = SubResource( 6 )
+
+[node name="Outline3D" type="Spatial"]
+script = ExtResource( 2 )
+
+[node name="SphereMeshA" type="MeshInstance" parent="."]
+layers = 3
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="SphereMeshB" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.112898, 0.912493, 1.30658 )
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="CubeMeshA" type="MeshInstance" parent="."]
+transform = Transform( 0.758953, 0.365791, -0.53869, -0.651145, 0.426354, -0.627879, 0, 0.827296, 0.561766, -4.16307, 4.02184, 0 )
+layers = 3
+mesh = SubResource( 5 )
+material/0 = null
+
+[node name="Viewport" type="Viewport" parent="."]
+size = Vector2( 1920, 1080 )
+transparent_bg = true
+script = ExtResource( 5 )
+
+[node name="OutlineCamera" type="Camera" parent="Viewport"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.61455 )
+cull_mask = 2
+__meta__ = {
+"_editor_description_": "this camera is set to only render objects on cull mask layer 2"
+}
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.61455 )
+script = ExtResource( 3 )
+
+[node name="ScreenQuad" type="MeshInstance" parent="Camera"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.947806 )
+visible = false
+layers = 524288
+mesh = SubResource( 2 )
+skeleton = NodePath("../../Viewport")
+material/0 = SubResource( 4 )
+script = ExtResource( 4 )
+__meta__ = {
+"_editor_description_": "this screenspace quad is set to be invisible in the editor.
+
+it is important that this object is NOT included on the outline
+camera's cull mask layer otherwise it will produce feedback.
+
+the material attached is provided with a viewport texture.
+note: for viewport textures to work and not throw errors/warnings 
+about missing paths it's important that this object is lower in the 
+scenetree than the viewport itself. this ensures the viewport exists 
+prior to this node attempting to connect to it."
+}
+
+[node name="RemoteTransform" type="RemoteTransform" parent="Camera"]
+remote_path = NodePath("../../Viewport/OutlineCamera")
+__meta__ = {
+"_editor_description_": "drive transform of viewport camera"
+}
