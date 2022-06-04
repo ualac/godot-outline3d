@@ -10,7 +10,7 @@ config_version=4
 
 [application]
 
-config/name="scratch"
+config/name="outline3d"
 run/main_scene="res://Outline3D.tscn"
 config/icon="res://icon.png"
 
